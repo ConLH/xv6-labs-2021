@@ -1,6 +1,6 @@
-// Physical memory allocator, for user processes,
-// kernel stacks, page-table pages,
-// and pipe buffers. Allocates whole 4096-byte pages.
+// Physical memory allocator, for user processes, 物理内存分配器，用于用户进程
+// kernel stacks, page-table pages, 内核栈，页表页
+// and pipe buffers. Allocates whole 4096-byte pages. 管道缓冲区。 分配整个 4096 字节的页面
 
 #include "types.h"
 #include "param.h"
@@ -62,9 +62,9 @@ kfree(void *pa)
   release(&kmem.lock);
 }
 
-// Allocate one 4096-byte page of physical memory.
-// Returns a pointer that the kernel can use.
-// Returns 0 if the memory cannot be allocated.
+// Allocate one 4096-byte page of physical memory. 分配一个 4096 字节的物理内存页。
+// Returns a pointer that the kernel can use. 返回内核可以使用的指针。
+// Returns 0 if the memory cannot be allocated. 如果无法分配内存，则返回 0
 void *
 kalloc(void)
 {
@@ -77,6 +77,24 @@ kalloc(void)
   release(&kmem.lock);
 
   if(r)
-    memset((char*)r, 5, PGSIZE); // fill with junk
+    memset((char*)r, 5, PGSIZE); // fill with junk 填满垃圾
   return (void*)r;
+}
+
+uint64
+freememsize(void) 
+{
+  struct run *begin;
+  uint64 size = 0;
+  int cnt = 0;
+
+  acquire(&kmem.lock);
+  begin = kmem.freelist;
+  while(begin) {
+    begin = begin -> next;
+    cnt++;
+  }
+  release(&kmem.lock);
+  size = cnt * PGSIZE;
+  return size;
 }

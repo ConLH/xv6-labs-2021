@@ -53,7 +53,7 @@ argraw(int n)
   return -1;
 }
 
-// Fetch the nth 32-bit system call argument.
+// Fetch the nth 32-bit system call argument. 获取第n个32位系统调用参数。
 int
 argint(int n, int *ip)
 {
@@ -61,8 +61,8 @@ argint(int n, int *ip)
   return 0;
 }
 
-// Retrieve an argument as a pointer.
-// Doesn't check for legality, since
+// Retrieve an argument as a pointer. 检索参数作为指针。
+// Doesn't check for legality, since 不检查合法性，因为 copyin/copyout 会这样做。
 // copyin/copyout will do that.
 int
 argaddr(int n, uint64 *ip)
@@ -104,6 +104,8 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
+extern uint64 sys_trace(void);
+extern uint64 sys_sysinfo(void);
 
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -127,6 +129,8 @@ static uint64 (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_trace]   sys_trace,
+[SYS_sysinfo] sys_sysinfo
 };
 
 void
@@ -134,10 +138,19 @@ syscall(void)
 {
   int num;
   struct proc *p = myproc();
+  char* syscall_name[] = {"fork", "exit", "wait", "pipe",
+                          "read", "kill", "exec", "fstat",
+                          "chdir", "dup", "getpid", "sbrk",
+                          "sleep", "uptime", "open", "write",
+                          "mknod", "unlink", "link", "mkdir",
+                          "close", "trace"};
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->trapframe->a0 = syscalls[num]();
+    if((1 << num) & (p -> syscallnum)) {
+      printf("%d: syscall %s -> %d\n", p -> pid, syscall_name[num - 1], p -> trapframe -> a0);
+    }
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);

@@ -75,7 +75,7 @@ mycpu(void) {
   return c;
 }
 
-// Return the current struct proc *, or zero if none.
+// Return the current struct proc *, or zero if none. 返回当前结构体proc*，如果没有则返回零。
 struct proc*
 myproc(void) {
   push_off();
@@ -97,10 +97,10 @@ allocpid() {
   return pid;
 }
 
-// Look in the process table for an UNUSED proc.
-// If found, initialize state required to run in the kernel,
-// and return with p->lock held.
-// If there are no free procs, or a memory allocation fails, return 0.
+// Look in the process table for an UNUSED proc. 在进程表中查找未使用的进程
+// If found, initialize state required to run in the kernel, 如果找到，则初始化在内核中运行所需的状态
+// and return with p->lock held. 并返回 p->lock held
+// If there are no free procs, or a memory allocation fails, return 0. 如果没有空闲进程，或者内存分配失败，返回 0
 static struct proc*
 allocproc(void)
 {
@@ -120,14 +120,14 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
-  // Allocate a trapframe page.
+  // Allocate a trapframe page. 分配一个 trapframe 页面
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
     release(&p->lock);
     return 0;
   }
 
-  // An empty user page table.
+  // An empty user page table. 一个空的用户页表。
   p->pagetable = proc_pagetable(p);
   if(p->pagetable == 0){
     freeproc(p);
@@ -136,7 +136,7 @@ found:
   }
 
   // Set up new context to start executing at forkret,
-  // which returns to user space.
+  // which returns to user space. 设置新上下文以在返回用户空间的 forkret 处开始执行。
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
@@ -267,8 +267,8 @@ growproc(int n)
   return 0;
 }
 
-// Create a new process, copying the parent.
-// Sets up child kernel stack to return as if from fork() system call.
+// Create a new process, copying the parent. 创建一个新进程，复制父进程。
+// Sets up child kernel stack to return as if from fork() system call. 设置子内核堆栈以像从 fork() 系统调用返回一样。
 int
 fork(void)
 {
@@ -294,6 +294,9 @@ fork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
+
+  //将跟踪掩码从父进程复制到子进程.
+  np -> syscallnum = p -> syscallnum;
 
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
@@ -653,4 +656,17 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+uint64
+nproccnt(void)
+{
+  uint64 size  = 0;
+  struct proc * p;
+  for(p = proc; p < &proc[NPROC]; p++) {
+    if(p -> state != UNUSED) {
+      size++;
+    }
+  }
+  return size;
 }

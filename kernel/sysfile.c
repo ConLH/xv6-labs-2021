@@ -16,8 +16,8 @@
 #include "file.h"
 #include "fcntl.h"
 
-// Fetch the nth word-sized system call argument as a file descriptor
-// and return both the descriptor and the corresponding struct file.
+// Fetch the nth word-sized system call argument as a file descriptor 获取第 n 个字大小的系统调用参数作为文件描述符
+// and return both the descriptor and the corresponding struct file. 返回描述符和相应的结构文件。
 static int
 argfd(int n, int *pfd, struct file **pf)
 {

@@ -82,7 +82,7 @@ struct trapframe {
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
-// Per-process state
+// Per-process state 每个进程状态
 struct proc {
   struct spinlock lock;
 
@@ -92,6 +92,7 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
+  int syscallnum;              // 系统调用号
 
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
