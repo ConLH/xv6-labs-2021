@@ -55,9 +55,9 @@
 // in both user and kernel space.
 #define TRAMPOLINE (MAXVA - PGSIZE)
 
-// map kernel stacks beneath the trampoline,
+// map kernel stacks beneath the trampoline, 将内核堆栈映射到蹦床下方，每个堆栈都被无效的保护页包围。
 // each surrounded by invalid guard pages.
-#define KSTACK(p) (TRAMPOLINE - (p)*2*PGSIZE - 3*PGSIZE)
+#define KSTACK(p) (TRAMPOLINE - (p)*2*PGSIZE - 3*PGSIZE)  //分配 2个 PGSIZE，Kstack 占一个，guard page占一个
 
 // User memory layout.
 // Address zero first:

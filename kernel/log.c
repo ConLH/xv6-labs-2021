@@ -122,7 +122,7 @@ recover_from_log(void)
   write_head(); // clear the log
 }
 
-// called at the start of each FS system call.
+// called at the start of each FS system call. 在每个 FS 系统调用开始时调用。
 void
 begin_op(void)
 {

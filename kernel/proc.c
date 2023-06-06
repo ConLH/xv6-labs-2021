@@ -26,8 +26,8 @@ extern char trampoline[]; // trampoline.S
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
 
-// Allocate a page for each process's kernel stack.
-// Map it high in memory, followed by an invalid
+// Allocate a page for each process's kernel stack. 为每个进程的内核堆栈分配一个页面。
+// Map it high in memory, followed by an invalid 将其映射到内存的高位，然后是无效的保护页。
 // guard page.
 void
 proc_mapstacks(pagetable_t kpgtbl) {
@@ -37,7 +37,7 @@ proc_mapstacks(pagetable_t kpgtbl) {
     char *pa = kalloc();
     if(pa == 0)
       panic("kalloc");
-    uint64 va = KSTACK((int) (p - proc));
+    uint64 va = KSTACK((int) (p - proc));//获取元素间隔
     kvmmap(kpgtbl, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
   }
 }
@@ -247,7 +247,7 @@ userinit(void)
   release(&p->lock);
 }
 
-// Grow or shrink user memory by n bytes.
+// Grow or shrink user memory by n bytes. 减少或增加用户内存
 // Return 0 on success, -1 on failure.
 int
 growproc(int n)

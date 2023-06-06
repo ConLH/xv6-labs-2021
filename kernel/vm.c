@@ -11,11 +11,11 @@
  */
 pagetable_t kernel_pagetable;
 
-extern char etext[];  // kernel.ld sets this to end of kernel code.
+extern char etext[];  // kernel.ld sets this to end of kernel code. kernel.ld 将其设置为内核代码的末尾。Kernel text 结尾
 
 extern char trampoline[]; // trampoline.S
 
-// Make a direct-map page table for the kernel.
+// Make a direct-map page table for the kernel. 为内核制作一个直接映射页表。
 pagetable_t
 kvmmake(void)
 {
@@ -36,7 +36,7 @@ kvmmake(void)
   // map kernel text executable and read-only.
   kvmmap(kpgtbl, KERNBASE, KERNBASE, (uint64)etext-KERNBASE, PTE_R | PTE_X);
 
-  // map kernel data and the physical RAM we'll make use of.
+  // map kernel data and the physical RAM we'll make use of. 映射内核数据和我们将使用的物理 RAM。
   kvmmap(kpgtbl, (uint64)etext, (uint64)etext, PHYSTOP-(uint64)etext, PTE_R | PTE_W);
 
   // map the trampoline for trap entry/exit to
@@ -85,13 +85,13 @@ walk(pagetable_t pagetable, uint64 va, int alloc)
 
   for(int level = 2; level > 0; level--) {
     pte_t *pte = &pagetable[PX(level, va)];
-    if(*pte & PTE_V) {
+    if(*pte & PTE_V) {  //PTE存在则提取PPN为寻找下一级页表的物理地址
       pagetable = (pagetable_t)PTE2PA(*pte);
-    } else {
+    } else {  //PTE不存在则分配
       if(!alloc || (pagetable = (pde_t*)kalloc()) == 0)
         return 0;
       memset(pagetable, 0, PGSIZE);
-      *pte = PA2PTE(pagetable) | PTE_V;
+      *pte = PA2PTE(pagetable) | PTE_V;//将新分配的页表页面的物理地址放在PTE中
     }
   }
   return &pagetable[PX(0, va)];
@@ -130,9 +130,9 @@ kvmmap(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm)
     panic("kvmmap");
 }
 
-// Create PTEs for virtual addresses starting at va that refer to
+// Create PTEs for virtual addresses starting at va that refer to 为从 va 开始的虚拟地址创建 PTE，这些虚拟地址引用从 pa 开始的物理地址
 // physical addresses starting at pa. va and size might not
-// be page-aligned. Returns 0 on success, -1 if walk() couldn't
+// be page-aligned. Returns 0 on success, -1 if walk() couldn't va 和 size 可能没有页面对齐。
 // allocate a needed page-table page.
 int
 mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm)

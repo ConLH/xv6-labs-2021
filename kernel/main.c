@@ -6,7 +6,7 @@
 
 volatile static int started = 0;
 
-// start() jumps here in supervisor mode on all CPUs.
+// start() jumps here in supervisor mode on all CPUs. start() 在所有 CPU 上以管理员模式跳转到这里
 void
 main()
 {
