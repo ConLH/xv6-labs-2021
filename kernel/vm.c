@@ -57,7 +57,7 @@ kvminit(void)
 }
 
 // Switch h/w page table register to the kernel's page table,
-// and enable paging.
+// and enable paging. 将 h/w 页表寄存器切换到内核的页表，并启用分页。
 void
 kvminithart()
 {
@@ -186,8 +186,8 @@ uvmunmap(pagetable_t pagetable, uint64 va, uint64 npages, int do_free)
   }
 }
 
-// create an empty user page table.
-// returns 0 if out of memory.
+// create an empty user page table. 创建一个空的用户页表。
+// returns 0 if out of memory. 如果内存不足则返回 0。
 pagetable_t
 uvmcreate()
 {
@@ -366,7 +366,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 }
 
 // Copy from user to kernel.
-// Copy len bytes to dst from virtual address srcva in a given page table.
+// Copy len bytes to dst from virtual address srcva in a given page table. 从给定页表中的虚拟地址 srcva 复制 len 个字节到 dst。
 // Return 0 on success, -1 on error.
 int
 copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
@@ -432,3 +432,57 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+void _vmprint(pagetable_t pagetable, int level) {
+  for(int i = 0; i < 512; i++) {
+    pte_t pte = pagetable[i];
+    if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
+      for(int j = 0; j <= level; j++) {
+        printf("..");
+        if((j + 1) <= level) printf(" ");
+      }
+      uint64 child = PTE2PA(pte);
+      printf("%d: pte %p pa %p\n", i, pte, child);
+      _vmprint((pagetable_t) child, level + 1);
+    }else if(pte & PTE_V) {
+      uint64 child = PTE2PA(pte);
+      printf(".. .. ..%d: pte %p pa %p\n", i, pte, child);
+    }
+  }
+}
+
+void
+vmprint(pagetable_t pagetable) {
+  printf("page table %p\n", pagetable);
+  _vmprint(pagetable, 0);
+}
+
+pagetable_t
+proc_kpt_init(void) {
+  pagetable_t kpt;
+
+  kpt = uvmcreate();
+  if(kpt == 0) return 0;
+  
+  // uart registers
+  kvmmap(kpt, UART0, UART0, PGSIZE, PTE_R | PTE_W);
+
+  // virtio mmio disk interface
+  kvmmap(kpt, VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
+
+  // PLIC
+  kvmmap(kpt, PLIC, PLIC, 0x400000, PTE_R | PTE_W);
+
+  // map kernel text executable and read-only.
+  kvmmap(kpt, KERNBASE, KERNBASE, (uint64)etext-KERNBASE, PTE_R | PTE_X);
+
+  // map kernel data and the physical RAM we'll make use of. 映射内核数据和我们将使用的物理 RAM。
+  kvmmap(kpt, (uint64)etext, (uint64)etext, PHYSTOP-(uint64)etext, PTE_R | PTE_W);
+
+  // map the trampoline for trap entry/exit to
+  // the highest virtual address in the kernel.
+  kvmmap(kpt, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
+  
+  return kpt;
+}
+

@@ -97,10 +97,10 @@ allocpid() {
   return pid;
 }
 
-// Look in the process table for an UNUSED proc.
-// If found, initialize state required to run in the kernel,
-// and return with p->lock held.
-// If there are no free procs, or a memory allocation fails, return 0.
+// Look in the process table for an UNUSED proc. 在进程表中查找未使用的进程。
+// If found, initialize state required to run in the kernel, 如果找到，则初始化在内核中运行所需的状态，
+// and return with p->lock held. 并返回 p->lock 持有。
+// If there are no free procs, or a memory allocation fails, return 0. 如果没有空闲进程，或者内存分配失败，则返回 0。
 static struct proc*
 allocproc(void)
 {
@@ -135,8 +135,18 @@ found:
     return 0;
   }
 
+  p -> kernelpt = proc_kpt_init();
+
+  char *pa = kalloc();
+  if(pa == 0) {
+    panic("kalloc");
+  }
+  uint64 va = KSTACK((int) (p - proc));
+  kvmmap(p -> kernelpt, va, (uint64)pa, PGSIZE, PTE_R | PTE_W);
+  p -> kstack = va;
+
   // Set up new context to start executing at forkret,
-  // which returns to user space.
+  // which returns to user space. 设置新上下文以在返回用户空间的 forkret 处开始执行。
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
@@ -144,7 +154,7 @@ found:
   return p;
 }
 
-// free a proc structure and the data hanging from it,
+// free a proc structure and the data hanging from it, 释放一个 proc 结构和挂在它上面的数据，包括用户页面。
 // including user pages.
 // p->lock must be held.
 static void
@@ -156,6 +166,10 @@ freeproc(struct proc *p)
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
+  if(p -> kernelpt) {
+    proc_freepagetable(p -> kernelpt, p -> sz);
+  }
+  p -> kernelpt = 0;
   p->sz = 0;
   p->pid = 0;
   p->parent = 0;
@@ -166,10 +180,10 @@ freeproc(struct proc *p)
   p->state = UNUSED;
 }
 
-// Create a user page table for a given process,
-// with no user memory, but with trampoline pages.
+// Create a user page table for a given process, 为给定进程创建用户页表，
+// with no user memory, but with trampoline pages.没有用户内存，但有蹦床页面。
 pagetable_t
-proc_pagetable(struct proc *p)
+proc_pagetable(struct proc *p) //分配 trampoline 和 trapframe 页面
 {
   pagetable_t pagetable;
 
@@ -427,13 +441,13 @@ wait(uint64 addr)
   }
 }
 
-// Per-CPU process scheduler.
-// Each CPU calls scheduler() after setting itself up.
+// Per-CPU process scheduler. 每 CPU 进程调度程序。
+// Each CPU calls scheduler() after setting itself up. 每个 CPU 在自我设置后调用 scheduler()。
 // Scheduler never returns.  It loops, doing:
-//  - choose a process to run.
-//  - swtch to start running that process.
+//  - choose a process to run. - 选择要运行的进程。
+//  - swtch to start running that process. 切换以开始运行该进程。
 //  - eventually that process transfers control
-//    via swtch back to the scheduler.
+//    via swtch back to the scheduler. 最终，该进程通过 swtch 将控制权转移回调度程序。
 void
 scheduler(void)
 {
@@ -442,7 +456,7 @@ scheduler(void)
   
   c->proc = 0;
   for(;;){
-    // Avoid deadlock by ensuring that devices can interrupt.
+    // Avoid deadlock by ensuring that devices can interrupt. 通过确保设备可以中断来避免死锁。
     intr_on();
 
     for(p = proc; p < &proc[NPROC]; p++) {
@@ -453,11 +467,15 @@ scheduler(void)
         // before jumping back to us.
         p->state = RUNNING;
         c->proc = p;
+        w_satp(MAKE_SATP(p -> kernelpt));
+        sfence_vma();
         swtch(&c->context, &p->context);
 
         // Process is done running for now.
         // It should have changed its p->state before coming back.
         c->proc = 0;
+
+        kvminithart();
       }
       release(&p->lock);
     }
