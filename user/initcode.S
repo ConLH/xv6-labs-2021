@@ -1,4 +1,4 @@
-# Initial process that execs /init.
+# Initial process that execs /init. 执行 /init 的初始进程。
 # This code runs in user space.
 
 #include "syscall.h"

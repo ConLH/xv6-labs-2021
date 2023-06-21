@@ -390,8 +390,8 @@ copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
   return 0;
 }
 
-// Copy a null-terminated string from user to kernel.
-// Copy bytes to dst from virtual address srcva in a given page table,
+// Copy a null-terminated string from user to kernel. 将以 null 结尾的字符串从用户复制到内核。
+// Copy bytes to dst from virtual address srcva in a given page table, 从给定页表中的虚拟地址 srcva 复制字节到 dst，
 // until a '\0', or max.
 // Return 0 on success, -1 on error.
 int

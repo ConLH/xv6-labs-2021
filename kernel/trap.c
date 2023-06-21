@@ -30,8 +30,8 @@ trapinithart(void)
 }
 
 //
-// handle an interrupt, exception, or system call from user space.
-// called from trampoline.S
+// handle an interrupt, exception, or system call from user space. 处理来自用户空间的中断、异常或系统调用。
+// called from trampoline.S  从 trampoline.S 调用
 //
 void
 usertrap(void)
@@ -41,7 +41,7 @@ usertrap(void)
   if((r_sstatus() & SSTATUS_SPP) != 0)
     panic("usertrap: not from user mode");
 
-  // send interrupts and exceptions to kerneltrap(),
+  // send interrupts and exceptions to kerneltrap(), 向 kerneltrap() 发送中断和异常，因为我们现在在内核中。
   // since we're now in the kernel.
   w_stvec((uint64)kernelvec);
 
@@ -66,7 +66,14 @@ usertrap(void)
 
     syscall();
   } else if((which_dev = devintr()) != 0){
-    // ok
+    if(which_dev == 2) {
+      if(p->alarm_interval && p->alarm_valid && ++p->ticks_count == p->alarm_interval) {
+        memmove(p->alarm_trapframe, p->trapframe, sizeof(struct trapframe));
+        p->trapframe->epc = (uint64) p->alarm_handler;
+        p->alarm_valid = 0;
+        p->ticks_count = 0;
+      }
+    }
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
@@ -77,8 +84,19 @@ usertrap(void)
     exit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2)
+  if(which_dev == 2) {
+    // if(++p->ticks_count == p->alarm_interval) {
+    //   p->trapframe->epc = (uint64) p->alarm_handler;
+    //   p->ticks_count = 0;
+    // }
+    // if(!p->alarm_interval && p->alarm_valid && ++p->ticks_count == p->alarm_interval) {
+    //   memmove(p->alarm_trapframe, p->trapframe, sizeof(struct trapframe));
+    //   p->trapframe->epc = (uint64) p->alarm_handler;
+    //   p->alarm_valid = 0;
+    //   p->ticks_count = 0;
+    // }
     yield();
+  }
 
   usertrapret();
 }
@@ -91,8 +109,8 @@ usertrapret(void)
 {
   struct proc *p = myproc();
 
-  // we're about to switch the destination of traps from
-  // kerneltrap() to usertrap(), so turn off interrupts until
+  // we're about to switch the destination of traps from      我们即将把陷阱的目的地从 kerneltrap() 切换到 usertrap()，
+  // kerneltrap() to usertrap(), so turn off interrupts until 所以关闭中断直到我们回到用户空间，此时 usertrap() 是正确的。
   // we're back in user space, where usertrap() is correct.
   intr_off();
 
@@ -128,7 +146,7 @@ usertrapret(void)
   ((void (*)(uint64,uint64))fn)(TRAPFRAME, satp);
 }
 
-// interrupts and exceptions from kernel code go here via kernelvec,
+// interrupts and exceptions from kernel code go here via kernelvec, 来自内核代码的中断和异常通过 kernelvec 到达这里，无论当前内核堆栈是什么。
 // on whatever the current kernel stack is.
 void 
 kerneltrap()
@@ -168,7 +186,7 @@ clockintr()
   release(&tickslock);
 }
 
-// check if it's an external interrupt or software interrupt,
+// check if it's an external interrupt or software interrupt, 检查它是外部中断还是软件中断，并且处理它
 // and handle it.
 // returns 2 if timer interrupt,
 // 1 if other device,

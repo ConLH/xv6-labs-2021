@@ -1,11 +1,11 @@
 	#
-        # code to switch between user and kernel space.
+        # code to switch between user and kernel space. 在用户空间和内核空间之间切换的代码。
         #
         # this code is mapped at the same virtual address
         # (TRAMPOLINE) in user and kernel space so that
-        # it continues to work when it switches page tables.
+        # it continues to work when it switches page tables. 此代码映射到用户空间和内核空间中的相同虚拟地址 (TRAMPOLINE)，以便它在切换页表时继续工作。
 	#
-	# kernel.ld causes this to be aligned
+	# kernel.ld causes this to be aligned kernel.ld 使它与页面边界对齐。
         # to a page boundary.
         #
 	.section trampsec
