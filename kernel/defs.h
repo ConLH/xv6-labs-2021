@@ -34,8 +34,7 @@ int             fileread(struct file*, uint64, int n);
 int             filestat(struct file*, uint64 addr);
 int             filewrite(struct file*, uint64, int n);
 
-// fs.c
-void            fsinit(int);
+// fs.cerror: invalid use of undefined type ‘struct pageref’
 int             dirlink(struct inode*, char*, uint);
 struct inode*   dirlookup(struct inode*, char*, uint*);
 struct inode*   ialloc(uint, short);
@@ -63,6 +62,8 @@ void            ramdiskrw(struct buf*);
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
+void            refinc(void*);
+int             cowkalloc(pagetable_t, uint64);
 
 // log.c
 void            initlog(int, struct superblock*);
@@ -170,6 +171,7 @@ uint64          walkaddr(pagetable_t, uint64);
 int             copyout(pagetable_t, uint64, char *, uint64);
 int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
+pte_t*          walk(pagetable_t, uint64, int);
 
 // plic.c
 void            plicinit(void);

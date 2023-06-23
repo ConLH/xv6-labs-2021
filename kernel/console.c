@@ -71,9 +71,9 @@ consolewrite(int user_src, uint64 src, int n)
 }
 
 //
-// user read()s from the console go here.
-// copy (up to) a whole input line to dst.
-// user_dist indicates whether dst is a user
+// user read()s from the console go here. 用户从控制台读取（）转到此处。
+// copy (up to) a whole input line to dst. 将（最多）整个输入行复制到 dst。
+// user_dist indicates whether dst is a user / user_dist 指示 dst 是用户地址还是内核地址。
 // or kernel address.
 //
 int
@@ -87,7 +87,7 @@ consoleread(int user_dst, uint64 dst, int n)
   acquire(&cons.lock);
   while(n > 0){
     // wait until interrupt handler has put some
-    // input into cons.buffer.
+    // input into cons.buffer. 等到中断处理程序将一些输入放入 cons.buffer。
     while(cons.r == cons.w){
       if(myproc()->killed){
         release(&cons.lock);
@@ -101,7 +101,7 @@ consoleread(int user_dst, uint64 dst, int n)
     if(c == C('D')){  // end-of-file
       if(n < target){
         // Save ^D for next time, to make sure
-        // caller gets a 0-byte result.
+        // caller gets a 0-byte result. 保存 ^D 以供下次使用，以确保调用者获得 0 字节结果。
         cons.r--;
       }
       break;
@@ -127,9 +127,9 @@ consoleread(int user_dst, uint64 dst, int n)
 }
 
 //
-// the console input interrupt handler.
-// uartintr() calls this for input character.
-// do erase/kill processing, append to cons.buf,
+// the console input interrupt handler. 控制台输入中断处理程序。
+// uartintr() calls this for input character. uartintr() 将此称为输入字符。
+// do erase/kill processing, append to cons.buf, 进行擦除/终止处理，追加到 cons.buf，如果整行已到达则唤醒 consoleread()。
 // wake up consoleread() if a whole line has arrived.
 //
 void
@@ -185,7 +185,7 @@ consoleinit(void)
 
   uartinit();
 
-  // connect read and write system calls
+  // connect read and write system calls 将读写系统调用连接到consoleread 和consolewrite。
   // to consoleread and consolewrite.
   devsw[CONSOLE].read = consoleread;
   devsw[CONSOLE].write = consolewrite;

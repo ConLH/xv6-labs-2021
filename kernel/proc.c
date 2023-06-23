@@ -443,7 +443,7 @@ scheduler(void)
   c->proc = 0;
   for(;;){
     // Avoid deadlock by ensuring that devices can interrupt.
-    intr_on();
+    intr_on();  //设置SSTATUS寄存器，打开中断标志位
 
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
@@ -554,7 +554,7 @@ sleep(void *chan, struct spinlock *lk)
   acquire(lk);
 }
 
-// Wake up all processes sleeping on chan.
+// Wake up all processes sleeping on chan. 唤醒所有在 chan 上休眠的进程。
 // Must be called without any p->lock.
 void
 wakeup(void *chan)
@@ -597,7 +597,7 @@ kill(int pid)
 }
 
 // Copy to either a user address, or kernel address,
-// depending on usr_dst.
+// depending on usr_dst. 复制到用户地址或内核地址，具体取决于 usr_dst。
 // Returns 0 on success, -1 on error.
 int
 either_copyout(int user_dst, uint64 dst, void *src, uint64 len)

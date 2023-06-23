@@ -28,7 +28,7 @@ plicinithart(void)
   *(uint32*)PLIC_SPRIORITY(hart) = 0;
 }
 
-// ask the PLIC what interrupt we should serve.
+// ask the PLIC what interrupt we should serve. 询问 PLIC 我们应该服务什么中断。
 int
 plic_claim(void)
 {

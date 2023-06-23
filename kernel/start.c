@@ -20,7 +20,7 @@ extern void timervec();
 void
 start()
 {
-  // set M Previous Privilege mode to Supervisor, for mret.
+  // set M Previous Privilege mode to Supervisor, for mret. 将 M Previous Privilege mode 设置为 Supervisor，用于 mret。
   unsigned long x = r_mstatus();
   x &= ~MSTATUS_MPP_MASK;
   x |= MSTATUS_MPP_S;

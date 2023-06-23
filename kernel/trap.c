@@ -67,10 +67,16 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+  } else if(r_scause() == 13 || r_scause() == 15) {
+    uint64 va;
+    va = r_stval();
+    if(cowkalloc(p->pagetable, va) != 0) {
+      p->killed = 1;
+    }
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
-    p->killed = 1;
+    p->killed = 1; 
   }
 
   if(p->killed)
@@ -169,7 +175,7 @@ clockintr()
 }
 
 // check if it's an external interrupt or software interrupt,
-// and handle it.
+// and handle it. 检查是否是外部中断或软件中断，并处理。
 // returns 2 if timer interrupt,
 // 1 if other device,
 // 0 if not recognized.

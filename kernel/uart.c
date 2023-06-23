@@ -52,37 +52,37 @@ void uartstart();
 void
 uartinit(void)
 {
-  // disable interrupts.
+  // disable interrupts. 禁用中断。
   WriteReg(IER, 0x00);
 
-  // special mode to set baud rate.
+  // special mode to set baud rate. 设置波特率的特殊模式。
   WriteReg(LCR, LCR_BAUD_LATCH);
 
-  // LSB for baud rate of 38.4K.
+  // LSB for baud rate of 38.4K. 38.4K 波特率的 LSB。
   WriteReg(0, 0x03);
 
-  // MSB for baud rate of 38.4K.
+  // MSB for baud rate of 38.4K. 波特率 38.4K 的 MSB。
   WriteReg(1, 0x00);
 
-  // leave set-baud mode,
+  // leave set-baud mode, 离开设置波特率模式，并将字长设置为 8 位，无奇偶校验。
   // and set word length to 8 bits, no parity.
-  WriteReg(LCR, LCR_EIGHT_BITS);
+  WriteReg(LCR, LCR_EIGHT_BITS); 
 
   // reset and enable FIFOs.
   WriteReg(FCR, FCR_FIFO_ENABLE | FCR_FIFO_CLEAR);
 
-  // enable transmit and receive interrupts.
+  // enable transmit and receive interrupts. 启用发送和接收中断。
   WriteReg(IER, IER_TX_ENABLE | IER_RX_ENABLE);
 
   initlock(&uart_tx_lock, "uart");
 }
 
 // add a character to the output buffer and tell the
-// UART to start sending if it isn't already.
-// blocks if the output buffer is full.
+// UART to start sending if it isn't already. 添加一个字符到输出缓冲区并告诉 UART 开始发送（如果尚未发送）。
+// blocks if the output buffer is full. 如果输出缓冲区已满则阻塞。
 // because it may block, it can't be called
 // from interrupts; it's only suitable for use
-// by write().
+// by write(). 因为它可能会阻塞，所以不能从中断中调用它； 它仅适用于 write() 使用。
 void
 uartputc(int c)
 {
@@ -96,12 +96,12 @@ uartputc(int c)
   while(1){
     if(uart_tx_w == uart_tx_r + UART_TX_BUF_SIZE){
       // buffer is full.
-      // wait for uartstart() to open up space in the buffer.
+      // wait for uartstart() to open up space in the buffer. 等待 uartstart() 在缓冲区中打开空间。
       sleep(&uart_tx_r, &uart_tx_lock);
     } else {
       uart_tx_buf[uart_tx_w % UART_TX_BUF_SIZE] = c;
       uart_tx_w += 1;
-      uartstart();
+      uartstart();  //通知设备执行操作
       release(&uart_tx_lock);
       return;
     }
@@ -175,7 +175,7 @@ uartgetc(void)
 
 // handle a uart interrupt, raised because input has
 // arrived, or the uart is ready for more output, or
-// both. called from trap.c.
+// both. called from trap.c. 处理 uart 中断，该中断是由于输入已到达或 uart 已准备好接受更多输出或两者兼而有之而引发的。
 void
 uartintr(void)
 {
