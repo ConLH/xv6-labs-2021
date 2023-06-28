@@ -202,11 +202,11 @@ commit()
   }
 }
 
-// Caller has modified b->data and is done with the buffer.
-// Record the block number and pin in the cache by increasing refcnt.
-// commit()/write_log() will do the disk write.
+// Caller has modified b->data and is done with the buffer. 调用者已修改 b->data 并完成了缓冲区的操作。
+// Record the block number and pin in the cache by increasing refcnt. 通过增加 refcnt 来记录缓存中的块号和 pin。
+// commit()/write_log() will do the disk write. commit()/write_log() 将执行磁盘写入。
 //
-// log_write() replaces bwrite(); a typical use is:
+// log_write() replaces bwrite(); a typical use is: log_write() 取代 bwrite()； 典型用途是：
 //   bp = bread(...)
 //   modify bp->data[]
 //   log_write(bp)

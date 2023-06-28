@@ -7,9 +7,9 @@
 
 struct mbuf {
   struct mbuf  *next; // the next mbuf in the chain
-  char         *head; // the current start position of the buffer
+  char         *head; // the current start position of the buffer 缓冲区的当前起始位置
   unsigned int len;   // the length of the buffer
-  char         buf[MBUF_SIZE]; // the backing store
+  char         buf[MBUF_SIZE]; // the backing store 后备存储
 };
 
 char *mbufpull(struct mbuf *m, unsigned int len);

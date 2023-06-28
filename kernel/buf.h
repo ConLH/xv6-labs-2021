@@ -1,6 +1,6 @@
 struct buf {
-  int valid;   // has data been read from disk?
-  int disk;    // does disk "own" buf?
+  int valid;   // has data been read from disk? 缓冲区是否包含块的副本
+  int disk;    // does disk "own" buf? 缓冲区内容是否已经交给磁盘
   uint dev;
   uint blockno;
   struct sleeplock lock;

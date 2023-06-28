@@ -115,8 +115,8 @@ sys_fstat(void)
   return filestat(f, st);
 }
 
-// Create the path new as a link to the same inode as old.
-uint64
+// Create the path new as a link to the same inode as old. 
+uint64 // 创建新路径作为与旧路径相同的 inode 的链接。
 sys_link(void)
 {
   char name[DIRSIZ], new[MAXPATH], old[MAXPATH];
@@ -270,7 +270,7 @@ create(char *path, short type, short major, short minor)
   if(type == T_DIR){  // Create . and .. entries.
     dp->nlink++;  // for ".."
     iupdate(dp);
-    // No ip->nlink++ for ".": avoid cyclic ref count.
+    // No ip->nlink++ for ".": avoid cyclic ref count. 避免循环引用计数。
     if(dirlink(ip, ".", ip->inum) < 0 || dirlink(ip, "..", dp->inum) < 0)
       panic("create dots");
   }

@@ -3,7 +3,7 @@
 
 
 #define ROOTINO  1   // root i-number
-#define BSIZE 1024  // block size
+#define BSIZE 1024  // block size 块大小
 
 // Disk layout:
 // [ boot block | super block | log | inode blocks |
@@ -13,13 +13,13 @@
 // super block describes the disk layout:
 struct superblock {
   uint magic;        // Must be FSMAGIC
-  uint size;         // Size of file system image (blocks)
+  uint size;         // Size of file system image (blocks) 文件系统映像的大小
   uint nblocks;      // Number of data blocks
   uint ninodes;      // Number of inodes.
   uint nlog;         // Number of log blocks
   uint logstart;     // Block number of first log block
   uint inodestart;   // Block number of first inode block
-  uint bmapstart;    // Block number of first free map block
+  uint bmapstart;    // Block number of first free map block 第一个空闲地图块的块号
 };
 
 #define FSMAGIC 0x10203040
@@ -38,16 +38,16 @@ struct dinode {
   uint addrs[NDIRECT+1];   // Data block addresses
 };
 
-// Inodes per block.
+// Inodes per block. 每块包含多少个 inode
 #define IPB           (BSIZE / sizeof(struct dinode))
 
 // Block containing inode i
 #define IBLOCK(i, sb)     ((i) / IPB + sb.inodestart)
 
-// Bitmap bits per block
+// Bitmap bits per block 每个位图块有多少位数
 #define BPB           (BSIZE*8)
 
-// Block of free map containing bit for block b
+// Block of free map containing bit for block b 包含块 b 的位的空闲映射块
 #define BBLOCK(b, sb) ((b)/BPB + sb.bmapstart)
 
 // Directory is a file containing a sequence of dirent structures.

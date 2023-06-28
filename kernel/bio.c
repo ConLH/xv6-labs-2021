@@ -52,9 +52,9 @@ binit(void)
   }
 }
 
-// Look through buffer cache for block on device dev.
-// If not found, allocate a buffer.
-// In either case, return locked buffer.
+// Look through buffer cache for block on device dev. 查看缓冲区缓存以查找设备开发上的块。
+// If not found, allocate a buffer. 如果没有找到，则分配一个缓冲区。
+// In either case, return locked buffer. 无论哪种情况，都返回锁定的缓冲区。
 static struct buf*
 bget(uint dev, uint blockno)
 {
@@ -78,7 +78,7 @@ bget(uint dev, uint blockno)
     if(b->refcnt == 0) {
       b->dev = dev;
       b->blockno = blockno;
-      b->valid = 0;
+      b->valid = 0; //确保了bread将从磁盘读取数据，而不是错误地使用缓冲区以前的内容
       b->refcnt = 1;
       release(&bcache.lock);
       acquiresleep(&b->lock);
@@ -88,7 +88,7 @@ bget(uint dev, uint blockno)
   panic("bget: no buffers");
 }
 
-// Return a locked buf with the contents of the indicated block.
+// Return a locked buf with the contents of the indicated block. 返回一个锁定的缓冲区，其中包含指定块的内容。
 struct buf*
 bread(uint dev, uint blockno)
 {

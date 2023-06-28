@@ -115,11 +115,11 @@ struct tx_desc
 // [E1000 3.2.3]
 struct rx_desc
 {
-  uint64 addr;       /* Address of the descriptor's data buffer */
-  uint16 length;     /* Length of data DMAed into data buffer */
-  uint16 csum;       /* Packet checksum */
-  uint8 status;      /* Descriptor status */
-  uint8 errors;      /* Descriptor Errors */
+  uint64 addr;       /* Address of the descriptor's data buffer 描述符数据缓冲区的地址 */ 
+  uint16 length;     /* Length of data DMAed into data buffer DMA 写入数据缓冲区的数据长度*/
+  uint16 csum;       /* Packet checksum  数据包校验和*/
+  uint8 status;      /* Descriptor status 描述符状态*/
+  uint8 errors;      /* Descriptor Errors 描述符错误*/
   uint16 special;
 };
 
