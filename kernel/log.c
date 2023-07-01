@@ -33,15 +33,15 @@
 // Contents of the header block, used for both the on-disk header block
 // and to keep track in memory of logged block# before commit.
 struct logheader {
-  int n;
-  int block[LOGSIZE];
+  int n;  //代表有效的log block的数量
+  int block[LOGSIZE]; //每个log block的实际对应的block编号
 };
 
 struct log {
   struct spinlock lock;
   int start;
   int size;
-  int outstanding; // how many FS sys calls are executing.
+  int outstanding; // how many FS sys calls are executing. 正在执行多少个 FS 系统调用。
   int committing;  // in commit(), please wait.
   int dev;
   struct logheader lh;
@@ -65,7 +65,7 @@ initlog(int dev, struct superblock *sb)
 }
 
 // Copy committed blocks from log to their home location
-static void
+static void //将提交的块从日志复制到其主位置
 install_trans(int recovering)
 {
   int tail;
@@ -96,7 +96,7 @@ read_head(void)
   brelse(buf);
 }
 
-// Write in-memory log header to disk.
+// Write in-memory log header to disk. 将内存中的日志头写入磁盘。
 // This is the true point at which the
 // current transaction commits.
 static void
@@ -196,7 +196,7 @@ commit()
   if (log.lh.n > 0) {
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
-    install_trans(0); // Now install writes to home locations
+    install_trans(0); // Now install writes to home locations 现在安装写入到主位置
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
   }

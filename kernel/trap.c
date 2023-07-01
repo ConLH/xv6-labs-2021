@@ -5,6 +5,8 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "fcntl.h"
+
 
 struct spinlock tickslock;
 uint ticks;
@@ -67,6 +69,15 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+  } else if(r_scause() == 13 || r_scause() == 15) {
+#ifdef LAB_MMAP
+    uint64 fault_va = r_stval();
+    if(PGROUNDUP(p->trapframe->sp) - 1 < fault_va && fault_va < p->sz) { //地址高于用户栈地域
+      if(mmap_handler(r_stval(), r_scause()) != 0) p->killed = 1;
+    }else {
+      p->killed = 1;
+    }
+#endif
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
@@ -217,4 +228,5 @@ devintr()
     return 0;
   }
 }
+
 
